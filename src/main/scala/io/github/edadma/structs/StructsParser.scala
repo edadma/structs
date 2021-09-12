@@ -17,7 +17,7 @@ object StructsParser extends RegexParsers with PackratParsers {
     rep(struct) ^^ StructDeclarationsAST
 
   lazy val struct: PackratParser[StructDeclarationAST] =
-    kw("typedef") ~ kw("struct") ~> ("{" ~> repsep(member, ";") <~ "}") ~ ident <~ ";" ^^ {
+    kw("typedef") ~ kw("struct") ~> ("{" ~> rep(member <~ ";") <~ "}") ~ ident <~ ";" ^^ {
       case ms ~ n => StructDeclarationAST(n, ms)
     }
 
@@ -43,7 +43,7 @@ object StructsParser extends RegexParsers with PackratParsers {
   }
 
   lazy val member: PackratParser[MemberAST] =
-    ctype ~ ident ^^ {
+    ctype ~ repsep(ident, ",") ^^ {
       case t ~ n => MemberAST(n, t)
     }
 

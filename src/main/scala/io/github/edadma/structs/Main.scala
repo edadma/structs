@@ -71,20 +71,28 @@ object Main extends App {
 
     val template =
       """
-        |{{#structs}}
-        |type {{name}} = CStruct{{count}}({{#members}}{{type}}{{semi}}{{/members}}) //{{line}}
-        |
-        |{{/structs}}
-        |""".trim.stripMargin
+       |{{#structs}}
+       |type {{name}} = CStruct{{count}}[{{#members}}{{type}}{{comma}}{{/members}}] //{{line}}
+       |
+       |implicit class {{name}}(val ptr: Ptr[lib.{{name}}]) extends AnyVal {
+       |{{#members}}
+       |  def {{name}: {{type}}
+       |{{/members}}
+       |}
+       |{{/structs}}
+       |""".trim.stripMargin
 
     println(processMustache(data, template, "trim" -> false, "removeNonSectionBlanks" -> false))
   }
 
   def membersData(ms: List[MemberAST]): json.Array = {
-    val array = for (MemberAST(Ident(_, name), typ) <- ms) yield (name, type2string(typ))
+    val array =
+      ms flatMap {
+        case MemberAST(ns, typ) => ns map { case Ident(_, name) => (name, type2string(typ)) }
+      }
 
     json.Array(array.zipWithIndex map {
-      case ((n, t), i) => json.Object("name" -> n, "type" -> t, "semi" -> (if (i == array.length - 1) "" else "; "))
+      case ((n, t), i) => json.Object("name" -> n, "type" -> t, "comma" -> (if (i == array.length - 1) "" else ", "))
     })
   }
 
