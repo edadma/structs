@@ -1,0 +1,1 @@
+/home/ed/dev-sn/structs/target/scala-2.13/structs-out -s $1 -e $2 $3.h

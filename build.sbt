@@ -1,4 +1,4 @@
-name := "struct"
+name := "structs"
 
 version := "0.1.0"
 
