@@ -61,9 +61,11 @@ object Main extends App {
     val list                           = new ListBuffer[json.Object]
 
     for (StructDeclarationAST(name, members) <- externs) {
+      val membersDecls = membersData(members)
+
       list += json.Object("name"    -> name.s,
-                          "members" -> membersData(members),
-                          "count"   -> members.length,
+                          "members" -> membersDecls,
+                          "count"   -> membersDecls.length,
                           "line"    -> (conf.start + name.pos.line - 1).toString)
     }
 
