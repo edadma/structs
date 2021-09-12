@@ -76,7 +76,11 @@ object Main extends App {
        |
        |implicit class {{name}}(val ptr: Ptr[lib.{{name}}]) extends AnyVal {
        |{{#members}}
-       |  def {{name}: {{type}}
+       |  def {{name}}: {{type}} = ptr._{{ordinal}}
+       |{{/members}}
+       |
+       |{{#members}}
+       |  def {{name}}_=(v: {{type}}) = ptr._{{ordinal}} = v
        |{{/members}}
        |}
        |{{/structs}}
@@ -85,14 +89,30 @@ object Main extends App {
     println(processMustache(data, template, "trim" -> false, "removeNonSectionBlanks" -> false))
   }
 
+  def camel(s: String): String = {
+    val segs = s.split("_")
+    val buf  = new StringBuilder
+
+    buf ++= segs(0)
+
+    for (i <- segs.indices drop 1)
+      buf ++= segs(i).head.toUpper +: segs(i).tail
+
+    buf.toString
+  }
+
   def membersData(ms: List[MemberAST]): json.Array = {
     val array =
       ms flatMap {
-        case MemberAST(ns, typ) => ns map { case Ident(_, name) => (name, type2string(typ)) }
+        case MemberAST(ns, typ) => ns map { case Ident(_, name) => (camel(name), type2string(typ)) }
       }
 
     json.Array(array.zipWithIndex map {
-      case ((n, t), i) => json.Object("name" -> n, "type" -> t, "comma" -> (if (i == array.length - 1) "" else ", "))
+      case ((n, t), i) =>
+        json.Object("name"    -> n,
+                    "type"    -> t,
+                    "ordinal" -> (i + 1),
+                    "comma"   -> (if (i == array.length - 1) "" else ", "))
     })
   }
 
