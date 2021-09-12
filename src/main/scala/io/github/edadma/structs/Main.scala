@@ -82,7 +82,7 @@ object Main extends App {
        |{{/members}}
        |
        |{{#members}}
-       |  def {{name}}_=(v: {{type}}) = ptr._{{ordinal}} = v
+       |  def {{name}}_=(v: {{type}}): Unit = ptr._{{ordinal}} = v
        |{{/members}}
        |}
        |{{/structs}}
